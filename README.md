@@ -1,3 +1,5 @@
+[![Build status](https://dev.azure.com/NEE-devops/Timeline/_apis/build/status/Timeline-ASP.NET%20Core-CI)](https://dev.azure.com/NEE-devops/Timeline/_build/latest?definitionId=-1)
+
 # Introduction 
 TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
 
