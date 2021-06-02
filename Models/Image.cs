@@ -1,32 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using AnomalyService.Helpers;
 
 namespace AnomalyService.Models
 {
-    public class AnomalyReport
+    public class Image
     {
-        public AnomalyReport()
+        public Image()
         {
         }
 
-        public int  Id
+        public int Id
         {
             get;
             set;
         }
 
-        public string Title
+        public string Name
         {
             get;
             set;
         }
 
-        public string Comment
+        public string Road
         {
             get;
             set;
         }
+
 
         public string Kp
         {
@@ -46,11 +48,12 @@ namespace AnomalyService.Models
             set;
         }
 
-        public string Road
+        public DateTime TakenAt
         {
             get;
             set;
         }
+
 
         [DefaultValue(true)]
         public DateTime CreatedAt
@@ -66,10 +69,18 @@ namespace AnomalyService.Models
             set;
         }
 
-        public int AnomalyId { get; set; }
-        public Anomaly Anomaly { get; set; }
+
+        public Uri Url
+        {
+            get
+            {
+                return new AzureStorageHelper().GetServiceSasUriForBlob(this.Name);
+            } 
+        }
 
         public List<AnomalyReportImage> AnomelyReportImage { get; set; }
 
     }
+
+   
 }
