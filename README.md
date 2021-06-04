@@ -1,21 +1,26 @@
-[![Build status](https://dev.azure.com/NEE-devops/Timeline/_apis/build/status/Build%20Anomaly-Service)](https://dev.azure.com/NEE-devops/Timeline/_build/latest?definitionId=11)
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+The Anomaly-Service offers a REST API to perform the CRUD operation on the Anomaly-Storage.
+It also manages the upload of files to the File-Storage.
+The basics operations are CRUD for Anomalies and CRUD for Reports.
+
+Functionality	Interface		
+Create Anomaly	       POST /anomalies	
+Update Anomaly	       PUT /anomalies/{anomalyId}	
+Delete Anomaly	       DELETE /anomalies/{anomalyId}	
+Get Anomaly	           GET /anomalies/{anomalyId}	
+Get Anomaly List	   GET /anomalies/	
+Create Report	       POST /reports	
+Update Report	       PUT /reports/{reportId}	
+Delete Report	       DELETE /reports/{reportId}	
+Get Report	           GET /reports/{id}	
+Get Report List	       GET /anomalies/{anomalyId} /reports/	
+
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+Installation process
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+checkout the repository
+open the project in Visual Studio
+update the NuGet packages
+update the azure storage connection string anf the container name in the appsettings
