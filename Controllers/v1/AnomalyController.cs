@@ -20,7 +20,7 @@ namespace AnomalyService.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllAnomaly()
+        public  IActionResult GetAllAnomaly()
         {
             var result =new
             {
@@ -31,7 +31,25 @@ namespace AnomalyService.Controllers
             return Ok(result);
         }
 
-       
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAnomalyById([FromRoute] int id)
+        {
+
+            var findAnomaly = await _db.Anomalys.FindAsync(id);
+            if(findAnomaly == null)
+            {
+                return NotFound();
+            }
+
+            var result = new
+            {
+                response = findAnomaly,
+            };
+
+            return Ok(result);
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> AddAnomaly ([FromBody] Anomaly objAnomaly)
         {
