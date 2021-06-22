@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 
-namespace AnomalyService.Controllers
+namespace ImageService.Controllers
 {
     [EnableCors("CorsApi")]
     [Route("api/v{version:apiVersion}/[controller]")]
@@ -35,68 +35,41 @@ namespace AnomalyService.Controllers
         }
 
         [HttpPost, DisableRequestSizeLimit]
-        public async Task<IActionResult> AddImage( IFormCollection data, IFormFile imageFile)
+        public async Task<IActionResult> AddImage(IFormCollection data, IFormFile imageFile)
         {
 
-            Console.WriteLine(data);
+            
+            //Set Key Name
+            string ImageName = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
 
-            //if (!ModelState.IsValid)
-            //{
-            //    return new JsonResult("Error while creating new Anomaly Report");
-            //}
+            Console.WriteLine(ImageName);
+            //Get url To Save
+            string SavePath = Path.Combine(Directory.GetCurrentDirectory(), ImageName);
 
-            //string ImageName = data["fileName"];
-            //var formCollection = await Request.ReadFormAsync();
-            //var file = formCollection.Files.First();
+            using (var stream = new FileStream(SavePath, FileMode.Create))
+            //using (var stream = imageFile.OpenReadStream())
 
-            Console.WriteLine(imageFile);
+            {
+                await imageFile.CopyToAsync(stream);
+                await new AzureStorageHelper().UploadAsync(ImageName, SavePath, stream);
 
-            //if (file.Length > 0)
-            //{
-            //    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName;
-            //    //ImageName = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            //    string SavePath = Path.Combine(Directory.GetCurrentDirectory(), fileName.ToString());
-
-            //    using (var stream = new FileStream(SavePath, FileMode.Create))
-            //    {
-            //        file.CopyTo(stream);
-            //        //await new AzureStorageHelper().UploadAsync(ImageName, SavePath, stream);
-            //    }
-            //}
-            //    if (imageFile != null)
-            //{
-
-            //    //Set Key Name
-            //    ImageName = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-
-            //    Console.WriteLine(ImageName);
-            //    //Get url To Save
-            //    string SavePath = Path.Combine(Directory.GetCurrentDirectory(), ImageName);
-
-            //    using (var stream = new FileStream(SavePath, FileMode.Create))
-            //    //using (var stream = imageFile.OpenReadStream())
-
-            //    {
-            //        await new AzureStorageHelper().UploadAsync(ImageName, SavePath, stream);
-            //        await imageFile.CopyToAsync(stream);
-            //    }
-            //}
+            }
 
             Image newImageData = new Image();
-            //newImageData.Name = ImageName;
-            //newImageData.Kp = data["kp"];
-            //newImageData.Road = data["road"];
-            //newImageData.Latitude = data["latitude"];
-            //newImageData.Longitude = data["longitude"];
-            ////newImageData.TakenAt = string.IsNullOrWhiteSpace(data["takenAt"]) ? DateTime.Now : DateTime.ParseExact(data["takenAt"].ToString(), "yyyy-MM-dd HH:mm:ss", null);
-            ////newImageData.CreatedAt = string.IsNullOrWhiteSpace(data["createdAt"]) ? DateTime.Now : DateTime.ParseExact(data["createdAt"].ToString(), "yyyy-MM-dd HH:mm:ss", null);
-            //newImageData.TakenAt = DateTime.Now;
-            //newImageData.CreatedAt = DateTime.Now;
-            //newImageData.UpdatedAt = DateTime.Now;
+            newImageData.Name = ImageName;
+            newImageData.Kp = data["kp"];
+            newImageData.Road = data["road"];
+            newImageData.Latitude = data["latitude"];
+            newImageData.Longitude = data["longitude"];
+            newImageData.TakenAt = string.IsNullOrWhiteSpace(data["takenAt"]) ? DateTime.Now : DateTime.ParseExact(data["takenAt"].ToString(), "yyyy-MM-dd HH:mm:ss", null);
+            newImageData.CreatedAt = string.IsNullOrWhiteSpace(data["createdAt"]) ? DateTime.Now : DateTime.ParseExact(data["createdAt"].ToString(), "yyyy-MM-dd HH:mm:ss", null);
+            newImageData.TakenAt = DateTime.Now;
+            newImageData.CreatedAt = DateTime.Now;
+            newImageData.UpdatedAt = DateTime.Now;
 
 
-            //_db.Images.Add(newImageData);
-            //await _db.SaveChangesAsync();
+            _db.Images.Add(newImageData);
+            await _db.SaveChangesAsync();
             return new JsonResult(new
             {
                 response = newImageData
@@ -104,8 +77,9 @@ namespace AnomalyService.Controllers
             {
                 StatusCode = 200
             };
-
         }
+
+
 
 
         [HttpPost("upload")]
@@ -123,8 +97,8 @@ namespace AnomalyService.Controllers
                 using (var stream = imageFile.OpenReadStream())
 
                 {
+                    await imageFile.CopyToAsync(stream);
                     await new AzureStorageHelper().UploadAsync(ImageName, SavePath, stream);
-                    //await imageFile.CopyToAsync(stream);
                 }
 
             }
@@ -138,13 +112,13 @@ namespace AnomalyService.Controllers
         {
             if (objImage == null || id != objImage.Id)
             {
-                return new JsonResult("Anomaly was not Found");
+                return new JsonResult("Image was not Found");
             }
             else
             {
                 _db.Images.Update(objImage);
                 await _db.SaveChangesAsync();
-                return new JsonResult("Anomaly created Successfully");
+                return new JsonResult("Image created Successfully");
             }
         }
 
@@ -162,7 +136,7 @@ namespace AnomalyService.Controllers
             {
                 _db.Images.Remove(findImage);
                 await _db.SaveChangesAsync();
-                return new JsonResult("Anomaly Deleted Successfully");
+                return new JsonResult("Image Deleted Successfully");
             }
         }
     }

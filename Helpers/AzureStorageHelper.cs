@@ -104,8 +104,8 @@ namespace AnomalyService.Helpers
                 BlobClient blob = container.GetBlobClient(blobName);
 
                 // Upload file data
-                //await blob.UploadAsync(savePath);
-                await blob.UploadAsync(stream);
+                await blob.UploadAsync(savePath);
+                //await blob.UploadAsync(stream);
 
             }
             finally
@@ -113,7 +113,7 @@ namespace AnomalyService.Helpers
                 //Delete the file from local storage after uplaoding it to Azure Storage
                 if (System.IO.File.Exists(savePath))
                 {
-                    //System.IO.File.Delete(savePath);
+                    System.IO.File.Delete(savePath);
                 }
             }
         }
