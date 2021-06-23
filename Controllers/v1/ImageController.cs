@@ -106,6 +106,22 @@ namespace ImageService.Controllers
             return new JsonResult("Image Uploaded successfully");
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetImage([FromRoute] int id)
+        {
+            var findImage = await _db.Images.FindAsync(id);
+            if (findImage == null)
+            {
+                return NotFound();
+            }
+
+            var result = new
+            {
+                response = findImage,
+            };
+
+            return Ok(result);
+        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateImage([FromRoute] int id, [FromBody] Image objImage)
