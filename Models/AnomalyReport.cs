@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace AnomalyService.Models
 {
+    
     public class AnomalyReport
     {
         public AnomalyReport()
@@ -67,7 +69,7 @@ namespace AnomalyService.Models
         }
 
         public int AnomalyId { get; set; }
-        public Anomaly Anomaly { get; set; }
+        //public Anomaly Anomaly { get; set; }
 
         public List<AnomalyReportImage> AnomelyReportImage { get; set; }
 

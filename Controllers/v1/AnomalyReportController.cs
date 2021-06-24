@@ -9,6 +9,7 @@ using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace AnomalyService.Controllers
 {
@@ -18,6 +19,7 @@ namespace AnomalyService.Controllers
     public class AnomalyReportController : ControllerBase
     {
         private readonly ApplicationDBContext _db;
+        private RabbitMQHelper rbbit = new RabbitMQHelper();
         public AnomalyReportController(ApplicationDBContext db)
         {
             _db = db;
@@ -96,6 +98,9 @@ namespace AnomalyService.Controllers
             var savedObjAnomalyReport = _db.AnomalyReports.Add(objAnomalyReport);
             await _db.SaveChangesAsync();
 
+            var jsonified = JsonConvert.SerializeObject(objAnomalyReport);
+            rbbit.SendMessage(jsonified, "GIS-Queue");
+
             return new JsonResult(new
             {
                 response = objAnomalyReport,
@@ -124,6 +129,9 @@ namespace AnomalyService.Controllers
             {
                 var changedObjAnomalyReport = _db.AnomalyReports.Update(objAnomalyReport);
                 await _db.SaveChangesAsync();
+
+                var jsonified = JsonConvert.SerializeObject(objAnomalyReport);
+                rbbit.SendMessage(jsonified, "GIS-Queue");
                 return new JsonResult(new
                 {
                     response = objAnomalyReport,
@@ -148,7 +156,8 @@ namespace AnomalyService.Controllers
             else
             {
                 _db.AnomalyReports.Remove(findAnomalyReport);
-                await _db.SaveChangesAsync();
+                var jsonified = JsonConvert.SerializeObject(findAnomalyReport);
+                rbbit.SendMessage(jsonified, "GIS-Queue");
                 return new JsonResult("Anomaly Deleted Successfully");
 
             }

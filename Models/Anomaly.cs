@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace AnomalyService.Models
 {
@@ -41,7 +43,7 @@ namespace AnomalyService.Models
             get;
             set;
         }
-
-        public List<AnomalyReport> AnomelyReport { get; set; }
+        
+        public IList<AnomalyReport> AnomelyReport { get; set; }
     }
 }

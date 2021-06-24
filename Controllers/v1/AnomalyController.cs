@@ -5,6 +5,11 @@ using AnomalyService.Data;
 using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using RabbitMQ.Client;
+using System.Text;
+using AnomalyService.Helpers;
+using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace AnomalyService.Controllers
 {
@@ -14,6 +19,7 @@ namespace AnomalyService.Controllers
     public class AnomalyController : ControllerBase
     {
         private readonly ApplicationDBContext _db;
+        private RabbitMQHelper rbbit = new RabbitMQHelper();
         public AnomalyController(ApplicationDBContext db)
         {
             _db = db;
@@ -27,6 +33,9 @@ namespace AnomalyService.Controllers
                 response = _db.Anomalys.ToList(),
                 totalCount = _db.Anomalys.ToList().ToArray().Length
             };
+
+
+            
             
             return Ok(result);
         }
@@ -45,7 +54,7 @@ namespace AnomalyService.Controllers
             {
                 response = findAnomaly,
             };
-
+            
             return Ok(result);
         }
 
@@ -60,7 +69,9 @@ namespace AnomalyService.Controllers
 
             _db.Anomalys.Add(objAnomaly);
             await _db.SaveChangesAsync();
-
+           
+            var jsonified = JsonConvert.SerializeObject(objAnomaly);
+            rbbit.SendMessage(jsonified, "GIS-Queue");
             return new JsonResult("Anomaly created successfully");
         }
 
@@ -76,6 +87,10 @@ namespace AnomalyService.Controllers
             {
                 _db.Anomalys.Update(objAnomaly);
                 await _db.SaveChangesAsync();
+                var query = _db.Anomalys.Include(c=>c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
+              
+                var jsonifiedAnomaly = JsonConvert.SerializeObject(query);
+                rbbit.SendMessage(jsonifiedAnomaly, "GIS-Queue");
                 return new JsonResult("Anomaly created Successfully");
             }
         }
@@ -94,6 +109,8 @@ namespace AnomalyService.Controllers
             {
                 _db.Anomalys.Remove(findAnomaly);
                 await _db.SaveChangesAsync();
+                var jsonified = JsonConvert.SerializeObject(findAnomaly);
+                rbbit.SendMessage(jsonified, "GIS-Queue");
                 return new JsonResult("Anomaly Deleted Successfully");
 
             }
