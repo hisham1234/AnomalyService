@@ -43,7 +43,19 @@ namespace AnomalyService.Models
             get;
             set;
         }
-        
+
+        public string Latitude
+        {
+            get;
+            set;
+        }
+
+        public string Longitude
+        {
+            get;
+            set;
+        }
+
         public IList<AnomalyReport> AnomelyReport { get; set; }
     }
 }
