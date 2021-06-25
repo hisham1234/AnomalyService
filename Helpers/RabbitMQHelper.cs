@@ -20,23 +20,23 @@ namespace AnomalyService.Helpers
         }
         public void SendMessage(string msg,string routekey)
         {
-            var factory = new ConnectionFactory() { HostName = Host };
+            var factory = new ConnectionFactory() { HostName = Host,Password="nexco1234",UserName="nexco"  };
             
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.QueueDeclare(queue: routekey,
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+                //channel.QueueDeclare(queue: "Convocation-Queue",
+                //                     durable: true,
+                //                     exclusive: false,
+                //                     autoDelete: false,
+                //                     arguments: null);
 
                 
                 var body = Encoding.UTF8.GetBytes(msg);
 
-                channel.BasicPublish(exchange: "",
-                                     routingKey: routekey,
-                                     basicProperties: null,
+                channel.BasicPublish(exchange: "Convocation-Exchane",
+                                     routingKey: "UpdatedTestFrom",
+                                    
                                      body:body);
             }
         }

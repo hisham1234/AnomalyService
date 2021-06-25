@@ -109,5 +109,38 @@ namespace AnomalyService.Helpers
            
 
         }
+
+        public void UpdateAnomalyLatLon(int AnomalyId)
+        {
+            var sumOfLat = 0.0;
+            var sumOfLon = 0.0;
+            var counter = 0;
+
+            var reports=  _db.AnomalyReports.ToList().Where(x=>x.AnomalyId==AnomalyId);
+
+            foreach (var report in reports)
+            {
+                if (report.Latitude != "" && report.Longitude != "")
+                {
+                    counter++;
+                    sumOfLat = sumOfLat + Convert.ToDouble(report.Latitude);
+                    sumOfLon = sumOfLon + Convert.ToDouble(report.Longitude);
+                }
+               
+
+            }
+            var lat = sumOfLat / counter;
+            var lon = sumOfLon / counter;
+
+            var anomaly = _db.Anomalys.ToList().FirstOrDefault(x => x.Id == AnomalyId);
+            anomaly.Latitude = lat.ToString();
+            anomaly.Longitude = lon.ToString();
+
+            _db.Update(anomaly);
+            _db.SaveChanges();
+            _db.Entry(anomaly).State = EntityState.Detached;
+
+
+        }
     }
 }
