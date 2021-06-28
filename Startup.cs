@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MySqlConnector;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Pomelo.EntityFrameworkCore.MySql;
 namespace AnomalyService
 {
@@ -87,7 +89,10 @@ namespace AnomalyService
 
             services.Configure<IISServerOptions>(options => { options.AllowSynchronousIO = true; });
 
-
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
 
         }
 
