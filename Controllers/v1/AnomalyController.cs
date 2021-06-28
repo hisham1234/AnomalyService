@@ -5,6 +5,11 @@ using AnomalyService.Data;
 using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using RabbitMQ.Client;
+using System.Text;
+using AnomalyService.Helpers;
+using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace AnomalyService.Controllers
 {
@@ -14,9 +19,13 @@ namespace AnomalyService.Controllers
     public class AnomalyController : ControllerBase
     {
         private readonly ApplicationDBContext _db;
+        private RabbitMQHelper rbbit = new RabbitMQHelper();
+        private AnomalyHelper anm;
         public AnomalyController(ApplicationDBContext db)
         {
             _db = db;
+            anm = new AnomalyHelper(db);
+           
         }
 
         [HttpGet]
@@ -27,6 +36,9 @@ namespace AnomalyService.Controllers
                 response = _db.Anomalys.ToList(),
                 totalCount = _db.Anomalys.ToList().ToArray().Length
             };
+
+
+            
             
             return Ok(result);
         }
@@ -45,7 +57,7 @@ namespace AnomalyService.Controllers
             {
                 response = findAnomaly,
             };
-
+            
             return Ok(result);
         }
 
@@ -60,7 +72,10 @@ namespace AnomalyService.Controllers
 
             _db.Anomalys.Add(objAnomaly);
             await _db.SaveChangesAsync();
-
+           
+           
+            var jsonifiedAnomaly = JsonConvert.SerializeObject(objAnomaly);
+            rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Created");
             return new JsonResult("Anomaly created successfully");
         }
 
@@ -76,6 +91,11 @@ namespace AnomalyService.Controllers
             {
                 _db.Anomalys.Update(objAnomaly);
                 await _db.SaveChangesAsync();
+                anm.UpdateAnomalyLatLon(id);
+                var updatedAnomaly = _db.Anomalys.Include(c=>c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
+
+                var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
+                rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Updated");
                 return new JsonResult("Anomaly created Successfully");
             }
         }
@@ -92,8 +112,15 @@ namespace AnomalyService.Controllers
             }
             else
             {
+               
+                var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
+
+                var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
+                rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Deleted");
+
                 _db.Anomalys.Remove(findAnomaly);
                 await _db.SaveChangesAsync();
+                
                 return new JsonResult("Anomaly Deleted Successfully");
 
             }

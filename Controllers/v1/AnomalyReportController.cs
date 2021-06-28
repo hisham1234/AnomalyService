@@ -9,6 +9,7 @@ using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace AnomalyService.Controllers
 {
@@ -18,9 +19,12 @@ namespace AnomalyService.Controllers
     public class AnomalyReportController : ControllerBase
     {
         private readonly ApplicationDBContext _db;
+        private RabbitMQHelper rbbit = new RabbitMQHelper();
+        private AnomalyHelper anm;
         public AnomalyReportController(ApplicationDBContext db)
         {
             _db = db;
+            anm = new AnomalyHelper(db);
         }
 
         [HttpGet]
@@ -96,6 +100,12 @@ namespace AnomalyService.Controllers
             var savedObjAnomalyReport = _db.AnomalyReports.Add(objAnomalyReport);
             await _db.SaveChangesAsync();
 
+            anm.UpdateAnomalyLatLon(objAnomalyReport.AnomalyId);
+            var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
+
+            var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
+            rbbit.SendMessage(jsonifiedAnomaly, "Report.Created");
+
             return new JsonResult(new
             {
                 response = objAnomalyReport,
@@ -124,6 +134,12 @@ namespace AnomalyService.Controllers
             {
                 var changedObjAnomalyReport = _db.AnomalyReports.Update(objAnomalyReport);
                 await _db.SaveChangesAsync();
+
+                anm.UpdateAnomalyLatLon(objAnomalyReport.AnomalyId);
+                var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
+
+                var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
+                rbbit.SendMessage(jsonifiedAnomaly, "Report.Updated");
                 return new JsonResult(new
                 {
                     response = objAnomalyReport,
@@ -147,8 +163,16 @@ namespace AnomalyService.Controllers
             }
             else
             {
+
+                var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == findAnomalyReport.AnomalyId);
+
                 _db.AnomalyReports.Remove(findAnomalyReport);
                 await _db.SaveChangesAsync();
+                anm.UpdateAnomalyLatLon(findAnomalyReport.AnomalyId);
+               
+                var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
+                rbbit.SendMessage(jsonifiedAnomaly, "Report.Deleted");
+
                 return new JsonResult("Anomaly Deleted Successfully");
 
             }

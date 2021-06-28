@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace AnomalyService.Models
 {
@@ -42,6 +44,18 @@ namespace AnomalyService.Models
             set;
         }
 
-        public List<AnomalyReport> AnomelyReport { get; set; }
+        public string Latitude
+        {
+            get;
+            set;
+        }
+
+        public string Longitude
+        {
+            get;
+            set;
+        }
+
+        public IList<AnomalyReport> AnomelyReport { get; set; }
     }
 }
