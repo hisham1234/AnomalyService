@@ -104,7 +104,7 @@ namespace AnomalyService.Controllers
             var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
 
             var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
-            rbbit.SendMessage(jsonifiedAnomaly, "GIS-Queue");
+            rbbit.SendMessage(jsonifiedAnomaly, "Report.Created");
 
             return new JsonResult(new
             {
@@ -139,7 +139,7 @@ namespace AnomalyService.Controllers
                 var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
 
                 var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
-                rbbit.SendMessage(jsonifiedAnomaly, "GIS-Queue");
+                rbbit.SendMessage(jsonifiedAnomaly, "Report.Updated");
                 return new JsonResult(new
                 {
                     response = objAnomalyReport,
@@ -171,7 +171,7 @@ namespace AnomalyService.Controllers
                 anm.UpdateAnomalyLatLon(findAnomalyReport.AnomalyId);
                
                 var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
-                rbbit.SendMessage(jsonifiedAnomaly, "GIS-Queue");
+                rbbit.SendMessage(jsonifiedAnomaly, "Report.Deleted");
 
                 return new JsonResult("Anomaly Deleted Successfully");
 
