@@ -20,8 +20,8 @@ namespace AnomalyService.Helpers
         public RabbitMQHelper()
         {
             this.Host = Environment.GetEnvironmentVariable("RABBITMQ_HOSTNAME");
-            this.Host = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME");
-            this.Host = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
+            this.UserName = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME");
+            this.Password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
             this.Exchange = Startup.Configuration.GetConnectionString("RABBITMQ_EXCHANGE_NAME");
         }
         public void SendMessage(string msg,string routekey)
