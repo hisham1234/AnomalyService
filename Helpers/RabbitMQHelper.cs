@@ -19,10 +19,10 @@ namespace AnomalyService.Helpers
         private string Exchange;
         public RabbitMQHelper()
         {
-            this.Host= Startup.Configuration.GetConnectionString("HostName");
-            this.UserName= Startup.Configuration.GetConnectionString("RabbitMQUserName");
-            this.Password = Startup.Configuration.GetConnectionString("RabbitMQPassword");
-            this.Exchange = Startup.Configuration.GetConnectionString("RabbitMQExchange");
+            this.Host = Environment.GetEnvironmentVariable("RABBITMQ_HOSTNAME");
+            this.Host = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME");
+            this.Host = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
+            this.Exchange = Startup.Configuration.GetConnectionString("RABBITMQ_EXCHANGE_NAME");
         }
         public void SendMessage(string msg,string routekey)
         {

@@ -71,17 +71,6 @@ namespace AnomalyService.Controllers
             return Ok(result);
         }
 
-        [HttpGet("test")]
-        public async Task<IActionResult> TestAsync()
-        {
-            AzureStorageHelper bName = new AzureStorageHelper();
-
-            List<Uri> names = await bName.ListAsync();
-            return Ok(names);
-
-            //return new JsonResult("Tested");
-        }
-
         [HttpPost]
         public async Task<IActionResult> AddAnomalyReport([FromBody] AnomalyReport objAnomalyReport)
         {

@@ -20,8 +20,9 @@ namespace AnomalyService.Helpers
 
         public AzureStorageHelper()
         {
-            this.connectionString = Startup.Configuration.GetConnectionString("AzureStorageConnectionString");
-            this.containerName = Startup.Configuration.GetConnectionString("AzureContainerName");
+            this.connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
+            this.containerName = Environment.GetEnvironmentVariable("AZURE_CONTAINER_NAME");
+
             BlobServiceClient blobServiceClient = new BlobServiceClient(this.connectionString);
         }
 

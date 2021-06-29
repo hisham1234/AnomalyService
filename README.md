@@ -16,6 +16,16 @@ Get Report	           GET /reports/{id}
 Get Report List	       GET /anomalies/{anomalyId} /reports/	
 
 
+
+#Env variable
+- MYSQL_CONNECTION_STRING
+- AZURE_STORAGE_CONNECTION_STRING
+- AZURE_CONTAINER_NAME
+- RABBITMQ_HOSTNAME
+- RABBITMQ_USERNAME
+- RABBITMQ_PASSWORD
+- RABBITMQ_EXCHANGE_NAME
+
 # Getting Started
 
 Installation process
