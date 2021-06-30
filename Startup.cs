@@ -74,8 +74,8 @@ namespace AnomalyService
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsApi",
-                    builder => builder.WithOrigins("http://localhost:4200")
-                .AllowCredentials()
+                    builder => builder.AllowAnyOrigin()
+                //.AllowCredentials()
                  .AllowAnyMethod()
                  .AllowAnyHeader()
                     );
