@@ -73,12 +73,13 @@ namespace AnomalyService
 
             services.AddCors(options =>
             {
-                options.AddPolicy("CorsApi",
-                    builder => builder.WithOrigins("http://localhost:4200")
-                .AllowCredentials()
-                 .AllowAnyMethod()
-                 .AllowAnyHeader()
-                    );
+                options.AddPolicy("AllowAll",
+                    builder => builder
+                    .AllowAnyOrigin()
+                    .AllowCredentials()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                 );
             });
 
             services.Configure<FormOptions>(o => {
