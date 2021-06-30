@@ -20,8 +20,8 @@ namespace AnomalyService.Helpers
 
         public AzureStorageHelper()
         {
-            this.connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
-            this.containerName = Environment.GetEnvironmentVariable("AZURE_CONTAINER_NAME");
+            this.connectionString = Startup.Configuration.GetConnectionString("AZURE_STORAGE_CONNECTION_STRING");
+            this.containerName = Startup.Configuration.GetConnectionString("AZURE_CONTAINER_NAME");
 
             BlobServiceClient blobServiceClient = new BlobServiceClient(this.connectionString);
         }
@@ -105,17 +105,17 @@ namespace AnomalyService.Helpers
                 BlobClient blob = container.GetBlobClient(blobName);
 
                 // Upload file data
-                await blob.UploadAsync(savePath);
+                await blob.UploadAsync(stream,true);
                 //await blob.UploadAsync(stream);
 
             }
-            finally
+            catch(Exception ex)
             {
                 //Delete the file from local storage after uplaoding it to Azure Storage
-                if (System.IO.File.Exists(savePath))
-                {
-                    System.IO.File.Delete(savePath);
-                }
+                //if (System.IO.File.Exists(savePath))
+                //{
+                //    System.IO.File.Delete(savePath);
+                //}
             }
         }
     }
