@@ -10,15 +10,17 @@
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "api",
       "environmentVariables": {
+        "Key": "Value",
+        "MYSQL_CONNECTION_STRING": "server=localhost;user=root;password=FaryHisham11;database=anomaly_service",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "AnomalyService": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
