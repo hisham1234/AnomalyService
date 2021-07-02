@@ -10,6 +10,8 @@ using System.Text;
 using AnomalyService.Helpers;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace AnomalyService.Controllers
 {
@@ -21,109 +23,177 @@ namespace AnomalyService.Controllers
         private readonly ApplicationDBContext _db;
         private RabbitMQHelper rbbit = new RabbitMQHelper();
         private AnomalyHelper anm;
+        private LoggerHelper logHelp;
+        
         public AnomalyController(ApplicationDBContext db)
         {
             _db = db;
             anm = new AnomalyHelper(db);
-           
+            logHelp = new LoggerHelper();
+          
+
         }
 
         [HttpGet]
         public  IActionResult GetAllAnomaly()
         {
-            var result =new
+            logHelp.Log(logHelp.getMessage("GetAllAnomaly"));
+            try
             {
-                response = _db.Anomalys.ToList(),
-                totalCount = _db.Anomalys.ToList().ToArray().Length
-            };
-
+                var result = new
+                {
+                    response = _db.Anomalys.ToList(),
+                    totalCount = _db.Anomalys.ToList().ToArray().Length
+                };
+                logHelp.Log(logHelp.getMessage("GetAllAnomaly", 200));
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                logHelp.Log(logHelp.getMessage("GetAllAnomaly", 500));
+                logHelp.Log(logHelp.getMessage("GetAllAnomaly", ex.Message));
+                return StatusCode(500);
+            }
+            
 
             
             
-            return Ok(result);
+           
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAnomalyById([FromRoute] int id)
         {
+            logHelp.Log(logHelp.getMessage("GetAnomalyById"));
 
-            var findAnomaly = await _db.Anomalys.FindAsync(id);
-            if(findAnomaly == null)
+            try
             {
-                return NotFound();
+                var findAnomaly = await _db.Anomalys.FindAsync(id);
+                if (findAnomaly == null)
+                {
+                    return NotFound();
+                }
+
+                var result = new
+                {
+                    response = findAnomaly,
+                };
+                logHelp.Log(logHelp.getMessage("GetAnomalyById",200));
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                logHelp.Log(logHelp.getMessage("GetAnomalyById",500));
+                logHelp.Log(logHelp.getMessage("GetAnomalyById",ex.Message));
+                return StatusCode(500);
             }
 
-            var result = new
-            {
-                response = findAnomaly,
-            };
-            
-            return Ok(result);
+           
         }
 
 
         [HttpPost]
         public async Task<IActionResult> AddAnomaly ([FromBody] Anomaly objAnomaly)
         {
-            if (!ModelState.IsValid)
+            logHelp.Log(logHelp.getMessage("AddAnomaly"));
+            try
             {
-                return new JsonResult("Error while creating new Anomaly  ");
-            }
+                if (!ModelState.IsValid)
+                {
+                    logHelp.Log(logHelp.getMessage("AddAnomaly", 500));
+                    logHelp.Log(logHelp.getMessage("Error while creating new Anomaly"));
+                    return new JsonResult("Error while creating new Anomaly  ");
+                }
 
-            _db.Anomalys.Add(objAnomaly);
-            await _db.SaveChangesAsync();
-           
-           
-            var jsonifiedAnomaly = JsonConvert.SerializeObject(objAnomaly);
-            rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Created");
-            return new JsonResult("Anomaly created successfully");
+                _db.Anomalys.Add(objAnomaly);
+                await _db.SaveChangesAsync();
+
+                logHelp.Log(logHelp.getMessage("AddAnomaly",200));
+                var jsonifiedAnomaly = JsonConvert.SerializeObject(objAnomaly);
+                rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Created");
+                return  Ok();
+            }
+            catch (Exception ex)
+            {
+                logHelp.Log(logHelp.getMessage("AddAnomaly", 500));
+                logHelp.Log(logHelp.getMessage("AddAnomaly",ex.Message));
+                return StatusCode(500);
+            }
+            
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAnomaly ([FromRoute] int id, [FromBody] Anomaly objAnomaly)
         {
-            
-            if (objAnomaly == null || id != objAnomaly.Id)
+            logHelp.Log(logHelp.getMessage("UpdateAnomaly"));
+            try
             {
-                return new JsonResult("Anomaly was not Found");
-            }
-            else
-            {
-                _db.Anomalys.Update(objAnomaly);
-                await _db.SaveChangesAsync();
-                anm.UpdateAnomalyLatLon(id);
-                var updatedAnomaly = _db.Anomalys.Include(c=>c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
+                if (objAnomaly == null || id != objAnomaly.Id)
+                {
+                    logHelp.Log(logHelp.getMessage("UpdateAnomaly", 500));
+                    logHelp.Log(logHelp.getMessage("UpdateAnomaly","Anomaly was not Found"));
+                    return new JsonResult("Anomaly was not Found");
+                }
+                else
+                {
+                    _db.Anomalys.Update(objAnomaly);
+                    await _db.SaveChangesAsync();
+                    anm.UpdateAnomalyLatLon(id);
+                    var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
 
-                var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
-                rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Updated");
-                return new JsonResult("Anomaly created Successfully");
+                    logHelp.Log(logHelp.getMessage("UpdateAnomaly",200));
+                    var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
+                    rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Updated");
+                    return new JsonResult("Anomaly Updated Successfully");
+                }
             }
+            catch (Exception ex)
+            {
+                logHelp.Log(logHelp.getMessage("UpdateAnomaly",500));
+                logHelp.Log(logHelp.getMessage("UpdateAnomaly",ex.Message));
+                return StatusCode(500);
+            }
+          
         }
 
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAnomaly([FromRoute] int id)
         {
-            var findAnomaly = await _db.Anomalys.FindAsync(id);
-
-            if (findAnomaly == null)
+            logHelp.Log(logHelp.getMessage("DeleteAnomaly"));
+            try
             {
-                return NotFound();
+                var findAnomaly = await _db.Anomalys.FindAsync(id);
+
+                if (findAnomaly == null)
+                {
+                    logHelp.Log(logHelp.getMessage("DeleteAnomaly", 500));
+                    logHelp.Log(logHelp.getMessage("DeleteAnomaly", "Anomaly was not Found"));
+                    return NotFound();
+                }
+                else
+                {
+
+                    var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
+
+                    var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
+                    rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Deleted");
+
+                    _db.Anomalys.Remove(findAnomaly);
+                    await _db.SaveChangesAsync();
+                    logHelp.Log(logHelp.getMessage("DeleteAnomaly", 200));
+                    return new JsonResult("Anomaly Deleted Successfully");
+
+                }
             }
-            else
+            catch (Exception ex)
             {
-               
-                var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
 
-                var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
-                rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Deleted");
-
-                _db.Anomalys.Remove(findAnomaly);
-                await _db.SaveChangesAsync();
-                
-                return new JsonResult("Anomaly Deleted Successfully");
-
+                logHelp.Log(logHelp.getMessage("DeleteAnomaly",500));
+                logHelp.Log(logHelp.getMessage("DeleteAnomaly",ex.Message));
+                return StatusCode(500);
             }
+           
         }
     }
 }
