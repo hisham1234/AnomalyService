@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AnomalyService.Data;
+using AnomalyService.Helpers;
 using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -17,37 +18,71 @@ namespace AnomalyService.Controllers
     public class AnomalyReportImageController : ControllerBase
     {
         private readonly ApplicationDBContext _db;
+        private LoggerHelper logHelp;
         public AnomalyReportImageController(ApplicationDBContext db)
         {
             _db = db;
+            logHelp = new LoggerHelper();
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAnomalyReportImagesAsync()
         {
+            var methodName = "GetAllAnomalyReportImagesAsync";
+            logHelp.Log(logHelp.getMessage(methodName));
+            try
+            {
+                logHelp.Log(logHelp.getMessage(methodName, 200));
+                return Ok(await _db.AnomalyReportImages.Include(r => r.Image).ToListAsync());
+            }
+            catch (Exception ex)
+            {
 
-            return Ok(await _db.AnomalyReportImages.Include(r => r.Image).ToListAsync());
+                logHelp.Log(logHelp.getMessage(methodName, 500));
+                logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                return StatusCode(500);
+            }
+            
         }
 
 
         [HttpPost]
         public async Task<IActionResult> AddAnomalyReportImage([FromBody] AnomalyReportImage objAnomalyReportImage)
         {
-            if (!ModelState.IsValid)
+            var methodName = "AddAnomalyReportImage";
+            logHelp.Log(logHelp.getMessage(methodName));
+            try
             {
-                return new JsonResult("Error while creating new Anomaly Report");
+                if (!ModelState.IsValid)
+                {
+                    logHelp.Log(logHelp.getMessage(methodName, 500));
+                    logHelp.Log(logHelp.getMessage(methodName, "Error while creating new Anomaly Report"));
+                    return new JsonResult("Error while creating new Anomaly Report Image");
+                }
+
+                _db.AnomalyReportImages.Add(objAnomalyReportImage);
+                await _db.SaveChangesAsync();
+                logHelp.Log(logHelp.getMessage(methodName, 200));
+                return new JsonResult("Anomaly created successfully");
             }
+            catch (Exception ex)
+            {
 
-            _db.AnomalyReportImages.Add(objAnomalyReportImage);
-            await _db.SaveChangesAsync();
-
-            return new JsonResult("Anomaly created successfully");
+                logHelp.Log(logHelp.getMessage(methodName, 500));
+                logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                return StatusCode(500);
+            }
+           
         }
 
 
         [HttpPost("with-image-ids")]
         public async Task<IActionResult> AddAnomalyReportImageWithImageIds(JObject s)
         {
+            var methodName = "AddAnomalyReportImageWithImageIds";
+            logHelp.Log(logHelp.getMessage(methodName));
+
+
             int anomalyReportId = (int)s["anomalyReportId"];
             var imageIds = s["imageIds"];
 
@@ -72,19 +107,26 @@ namespace AnomalyService.Controllers
                 // Commit transaction if all commands succeed, transaction will auto-rollback
                 // when disposed if either commands fails
                 transaction.Commit();
+                logHelp.Log(logHelp.getMessage(methodName, 200));
+                return Ok("Okay");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 transaction.Rollback();
+                logHelp.Log(logHelp.getMessage(methodName, 500));
+                logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                return StatusCode(500);
             }
-                return Ok("Okay");
+                
         }
 
 
         [HttpPost("{anomalyReportId}/image-id/{imageId}")]
         public async Task<IActionResult> AddAnomalyReportImageWithImageIds([FromRoute] int anomalyReportId, int imageId)
         {
-           
+            var methodName = "AddAnomalyReportImageWithImageIds";
+            logHelp.Log(logHelp.getMessage(methodName));
+
             using var transaction = _db.Database.BeginTransaction();
 
             try
@@ -103,47 +145,86 @@ namespace AnomalyService.Controllers
                 // Commit transaction if all commands succeed, transaction will auto-rollback
                 // when disposed if either commands fails
                 transaction.Commit();
+                logHelp.Log(logHelp.getMessage(methodName, 200));
+                return Ok("Okay");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 transaction.Rollback();
+              
+                logHelp.Log(logHelp.getMessage(methodName, 500));
+                logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                return StatusCode(500);
             }
-            return Ok("Okay");
+            
         }
 
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAnomalyReportImage([FromRoute] int id, [FromBody] AnomalyReportImage objAnomalyReportImage)
         {
-            if (objAnomalyReportImage == null || id != objAnomalyReportImage.Id)
+            var methodName = "UpdateAnomalyReportImage";
+            logHelp.Log(logHelp.getMessage(methodName));
+            try
             {
-                return new JsonResult("Anomaly was not Found");
+                if (objAnomalyReportImage == null || id != objAnomalyReportImage.Id)
+                {
+                    logHelp.Log(logHelp.getMessage(methodName, 500));
+                    logHelp.Log(logHelp.getMessage(methodName, "Image was not Found"));
+                    return new JsonResult("Image was not Found");
+                }
+                else
+                {
+                    var changedObjAnomalyReportImage = _db.AnomalyReportImages.Update(objAnomalyReportImage);
+                    await _db.SaveChangesAsync();
+                    logHelp.Log(logHelp.getMessage(methodName, 200));
+                    return new JsonResult("Image Updated Successfully");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var changedObjAnomalyReportImage = _db.AnomalyReportImages.Update(objAnomalyReportImage);
-                await _db.SaveChangesAsync();
-                return new JsonResult("Anomaly created Successfully");
+
+                logHelp.Log(logHelp.getMessage(methodName, 500));
+                logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                return StatusCode(500);
             }
+            
         }
 
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAnomalyReportImages([FromRoute] int id)
         {
-            var findAnomalyReportImage = await _db.AnomalyReportImages.FindAsync(id);
+            var methodName = "DeleteAnomalyReportImages";
+            logHelp.Log(logHelp.getMessage(methodName));
 
-            if (findAnomalyReportImage == null)
+            try
             {
-                return NotFound();
-            }
-            else
-            {
-                _db.AnomalyReportImages.Remove(findAnomalyReportImage);
-                await _db.SaveChangesAsync();
-                return new JsonResult("Anomaly Deleted Successfully");
+                var findAnomalyReportImage = await _db.AnomalyReportImages.FindAsync(id);
 
+                if (findAnomalyReportImage == null)
+                {
+                    logHelp.Log(logHelp.getMessage(methodName, 404));
+                    logHelp.Log(logHelp.getMessage(methodName, "NotFound"));
+                    return NotFound();
+                }
+                else
+                {
+                    _db.AnomalyReportImages.Remove(findAnomalyReportImage);
+                    await _db.SaveChangesAsync();
+                    logHelp.Log(logHelp.getMessage(methodName, 200));
+                    return new JsonResult("Anomaly Deleted Successfully");
+
+                }
             }
+            catch (Exception ex)
+            {
+
+                logHelp.Log(logHelp.getMessage(methodName, 500));
+                logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                return StatusCode(500);
+            }
+            
         }
     }
 }

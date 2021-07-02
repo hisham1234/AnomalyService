@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using AnomalyService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Reflection;
 
 namespace AnomalyService.Helpers
 {
@@ -40,6 +41,9 @@ namespace AnomalyService.Helpers
                                     
                                      body:body);
             }
+            var logmsg = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + " |" + Assembly.GetCallingAssembly().GetName().Name + " |" + routekey + " Message Was Published ";
+
+            Console.WriteLine(logmsg);
         }
     }
 }
