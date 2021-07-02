@@ -8,6 +8,8 @@ using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Net.Http.Headers;
 
 namespace ImageService.Controllers
@@ -34,23 +36,27 @@ namespace ImageService.Controllers
             return Ok(result);
         }
 
+        
         [HttpPost, DisableRequestSizeLimit]
-        public async Task<IActionResult> AddImage(IFormCollection data, IFormFile imageFile)
+       
+        public async Task<IActionResult> AddImage(IFormCollection data,IFormFile imageFile)
         {
 
-            
+            var stream = new MemoryStream();
+            imageFile.CopyTo(stream);
             //Set Key Name
-            string ImageName = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            string ImageName = "pic_"+DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")+ Path.GetExtension(imageFile.FileName);
 
             Console.WriteLine(ImageName);
             //Get url To Save
             string SavePath = Path.Combine(Directory.GetCurrentDirectory(), ImageName);
 
-            using (var stream = new FileStream(SavePath, FileMode.Create))
+            //using (var stream = new FileStream(SavePath, FileMode.Create))
             //using (var stream = imageFile.OpenReadStream())
 
             {
-                await imageFile.CopyToAsync(stream);
+                //await imageFile.CopyToAsync(stream);
+                stream.Seek(0, SeekOrigin.Begin);
                 await new AzureStorageHelper().UploadAsync(ImageName, SavePath, stream);
 
             }
@@ -156,4 +162,7 @@ namespace ImageService.Controllers
             }
         }
     }
+
+
+    
 }

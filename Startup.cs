@@ -43,7 +43,7 @@ namespace AnomalyService
 
             services.AddDbContext<ApplicationDBContext>(
                 dbContextOptions => dbContextOptions
-                    .UseMySql(Environment.GetEnvironmentVariable("MYSQL_CONNECTION_STRING"), serverVersion)
+                    .UseMySql(Configuration.GetConnectionString("MYSQL"), serverVersion)
                     .EnableSensitiveDataLogging() // <-- These two calls are optional but help
                     .EnableDetailedErrors()       // <-- with debugging (remove for production).
             );
@@ -73,13 +73,12 @@ namespace AnomalyService
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",
-                    builder => builder
-                    .AllowAnyOrigin()
-                    .AllowCredentials()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                 );
+                options.AddPolicy("CorsApi",
+                    builder => builder.AllowAnyOrigin()
+                //.AllowCredentials()
+                 .AllowAnyMethod()
+                 .AllowAnyHeader()
+                    );
             });
 
             services.Configure<FormOptions>(o => {

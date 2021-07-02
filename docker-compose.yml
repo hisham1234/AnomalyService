@@ -1,8 +1,0 @@
-version: '3.4'
-
-services:
-  anomaly-service:
-    image: ${DOCKER_REGISTRY-}anomalyservice
-    build:
-      context: .
-      dockerfile: ./Dockerfile
