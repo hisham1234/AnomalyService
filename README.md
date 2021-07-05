@@ -28,6 +28,19 @@ Get Report List	       GET /anomalies/{anomalyId} /reports/
 
 # Getting Started
 
+
+## Setting up the database
+Update the database, create table with entity framework
+
+For now this process is done manually by :
+- changing the appsettings.json connection string to the right database's url to update
+- execute the command
+```bash
+dotnet ef database update
+```
+
+## Service intallation
+
 Installation process
 
 checkout the repository
