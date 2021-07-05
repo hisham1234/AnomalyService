@@ -151,7 +151,7 @@ namespace AnomalyService.Migrations
             modelBuilder.Entity("AnomalyService.Models.AnomalyReport", b =>
                 {
                     b.HasOne("AnomalyService.Models.Anomaly", null)
-                        .WithMany("AnomelyReport")
+                        .WithMany("AnomalyReport")
                         .HasForeignKey("AnomalyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -178,7 +178,7 @@ namespace AnomalyService.Migrations
 
             modelBuilder.Entity("AnomalyService.Models.Anomaly", b =>
                 {
-                    b.Navigation("AnomelyReport");
+                    b.Navigation("AnomalyReport");
                 });
 
             modelBuilder.Entity("AnomalyService.Models.AnomalyReport", b =>

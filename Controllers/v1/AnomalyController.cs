@@ -139,7 +139,7 @@ namespace AnomalyService.Controllers
                     _db.Anomalys.Update(objAnomaly);
                     await _db.SaveChangesAsync();
                     anm.UpdateAnomalyLatLon(id);
-                    var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
+                    var updatedAnomaly = _db.Anomalys.Include(c => c.Reports).ToList().FirstOrDefault(x => x.Id == id);
 
                     logHelp.Log(logHelp.getMessage("UpdateAnomaly",200));
                     var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
@@ -174,7 +174,7 @@ namespace AnomalyService.Controllers
                 else
                 {
 
-                    var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == id);
+                    var updatedAnomaly = _db.Anomalys.Include(c => c.Reports).ToList().FirstOrDefault(x => x.Id == id);
 
                     var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
                     rbbit.SendMessage(jsonifiedAnomaly, "Anomaly.Deleted");

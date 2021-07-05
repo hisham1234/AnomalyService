@@ -133,7 +133,7 @@ namespace AnomalyService.Controllers
                 await _db.SaveChangesAsync();
 
                 anm.UpdateAnomalyLatLon(objAnomalyReport.AnomalyId);
-                var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
+                var updatedAnomaly = _db.Anomalys.Include(c => c.Reports).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
 
                 var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
                 rbbit.SendMessage(jsonifiedAnomaly, "Report.Created");
@@ -184,7 +184,7 @@ namespace AnomalyService.Controllers
                     await _db.SaveChangesAsync();
 
                     anm.UpdateAnomalyLatLon(objAnomalyReport.AnomalyId);
-                    var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
+                    var updatedAnomaly = _db.Anomalys.Include(c => c.Reports).ToList().FirstOrDefault(x => x.Id == objAnomalyReport.AnomalyId);
 
                     var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
                     rbbit.SendMessage(jsonifiedAnomaly, "Report.Updated");
@@ -229,7 +229,7 @@ namespace AnomalyService.Controllers
                 else
                 {
 
-                    var updatedAnomaly = _db.Anomalys.Include(c => c.AnomelyReport).ToList().FirstOrDefault(x => x.Id == findAnomalyReport.AnomalyId);
+                    var updatedAnomaly = _db.Anomalys.Include(c => c.Reports).ToList().FirstOrDefault(x => x.Id == findAnomalyReport.AnomalyId);
 
                     _db.AnomalyReports.Remove(findAnomalyReport);
                     await _db.SaveChangesAsync();
