@@ -4,20 +4,19 @@ It also manages the upload of files to the File-Storage.
 The basics operations are CRUD for Anomalies and CRUD for Reports.
 
 Functionality	Interface		
-Create Anomaly	       POST /anomalies	
-Update Anomaly	       PUT /anomalies/{anomalyId}	
-Delete Anomaly	       DELETE /anomalies/{anomalyId}	
-Get Anomaly	           GET /anomalies/{anomalyId}	
-Get Anomaly List	   GET /anomalies/	
-Create Report	       POST /reports	
-Update Report	       PUT /reports/{reportId}	
-Delete Report	       DELETE /reports/{reportId}	
-Get Report	           GET /reports/{id}	
-Get Report List	       GET /anomalies/{anomalyId} /reports/	
+- Create Anomaly	       POST /anomalies	
+- Update Anomaly	       PUT /anomalies/{anomalyId}	
+- Delete Anomaly	       DELETE /anomalies/{anomalyId}	
+- Get Anomaly	           GET /anomalies/{anomalyId}	 Get Anomaly List	   GET /anomalies/	
+- Create Report	       POST /reports	
+- Update Report	       PUT /reports/{reportId}	
+- Delete Report	       DELETE /reports/{reportId}	
+- Get Report	           GET /reports/{id}	
+- Get Report List	       GET /anomalies/{anomalyId} /reports/	
 
 
 
-#Env variable
+# Env variable
 - MYSQL_CONNECTION_STRING
 - AZURE_STORAGE_CONNECTION_STRING
 - AZURE_CONTAINER_NAME

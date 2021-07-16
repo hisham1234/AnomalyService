@@ -8,6 +8,7 @@ using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace AnomalyService.Controllers
@@ -17,10 +18,13 @@ namespace AnomalyService.Controllers
     [ApiController]
     public class AnomalyReportImageController : ControllerBase
     {
+
+        private readonly ILogger _logger;
         private readonly ApplicationDBContext _db;
         private LoggerHelper logHelp;
-        public AnomalyReportImageController(ApplicationDBContext db)
+        public AnomalyReportImageController(ApplicationDBContext db, ILogger<AnomalyReportImageController> logger)
         {
+            _logger = logger;
             _db = db;
             logHelp = new LoggerHelper();
         }
@@ -30,9 +34,12 @@ namespace AnomalyService.Controllers
         {
             var methodName = "GetAllAnomalyReportImagesAsync";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
             try
             {
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName, 200));
                 return Ok(await _db.AnomalyReportImages.Include(r => r.Image).ToListAsync());
             }
             catch (Exception ex)
@@ -40,6 +47,8 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
             
@@ -51,18 +60,25 @@ namespace AnomalyService.Controllers
         {
             var methodName = "AddAnomalyReportImage";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
             try
             {
                 if (!ModelState.IsValid)
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Error while creating new Anomaly Report"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Error while creating new Anomaly Report"));
                     return new JsonResult("Error while creating new Anomaly Report Image");
                 }
 
                 _db.AnomalyReportImages.Add(objAnomalyReportImage);
                 await _db.SaveChangesAsync();
+
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName,200));
+
                 return new JsonResult("Anomaly created successfully");
             }
             catch (Exception ex)
@@ -70,6 +86,8 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
            
@@ -81,6 +99,9 @@ namespace AnomalyService.Controllers
         {
             var methodName = "AddAnomalyReportImageWithImageIds";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
+
 
 
             int anomalyReportId = (int)s["anomalyReportId"];
@@ -108,6 +129,8 @@ namespace AnomalyService.Controllers
                 // when disposed if either commands fails
                 transaction.Commit();
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName,200));
+
                 return Ok("Okay");
             }
             catch (Exception ex)
@@ -115,6 +138,8 @@ namespace AnomalyService.Controllers
                 transaction.Rollback();
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
                 
@@ -126,13 +151,12 @@ namespace AnomalyService.Controllers
         {
             var methodName = "AddAnomalyReportImageWithImageIds";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
 
             using var transaction = _db.Database.BeginTransaction();
 
             try
-            {
-
-                
+            {                
                     AnomalyReportImage newAnomalyReportImage = new AnomalyReportImage();
                     newAnomalyReportImage.AnomalyReportId = anomalyReportId;
                     newAnomalyReportImage.ImageId = imageId;
@@ -146,6 +170,8 @@ namespace AnomalyService.Controllers
                 // when disposed if either commands fails
                 transaction.Commit();
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                 return Ok("Okay");
             }
             catch (Exception ex)
@@ -154,6 +180,8 @@ namespace AnomalyService.Controllers
               
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
             
@@ -165,19 +193,26 @@ namespace AnomalyService.Controllers
         {
             var methodName = "UpdateAnomalyReportImage";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
             try
             {
                 if (objAnomalyReportImage == null || id != objAnomalyReportImage.Id)
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Image was not Found"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Error while creating new Anomaly Report"));
                     return new JsonResult("Image was not Found");
                 }
                 else
                 {
                     var changedObjAnomalyReportImage = _db.AnomalyReportImages.Update(objAnomalyReportImage);
                     await _db.SaveChangesAsync();
+
                     logHelp.Log(logHelp.getMessage(methodName, 200));
+                    _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                     return new JsonResult("Image Updated Successfully");
                 }
             }
@@ -186,6 +221,9 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
+
                 return StatusCode(500);
             }
             
@@ -197,6 +235,8 @@ namespace AnomalyService.Controllers
         {
             var methodName = "DeleteAnomalyReportImages";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
 
             try
             {
@@ -206,6 +246,9 @@ namespace AnomalyService.Controllers
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 404));
                     logHelp.Log(logHelp.getMessage(methodName, "NotFound"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Error while creating new Anomaly Report"));
+
                     return NotFound();
                 }
                 else
@@ -213,8 +256,9 @@ namespace AnomalyService.Controllers
                     _db.AnomalyReportImages.Remove(findAnomalyReportImage);
                     await _db.SaveChangesAsync();
                     logHelp.Log(logHelp.getMessage(methodName, 200));
-                    return new JsonResult("Anomaly Deleted Successfully");
+                    _logger.LogInformation(logHelp.getMessage(methodName, 200));
 
+                    return new JsonResult("Anomaly Deleted Successfully");
                 }
             }
             catch (Exception ex)
@@ -222,6 +266,8 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
             

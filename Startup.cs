@@ -38,6 +38,9 @@ namespace AnomalyService
             //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Anomaly_Service", Version = "v1" });
             //});
 
+            // Add application insights login
+            services.AddApplicationInsightsTelemetry();
+
 
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
 

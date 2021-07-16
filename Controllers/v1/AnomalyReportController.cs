@@ -9,6 +9,7 @@ using AnomalyService.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AnomalyService.Controllers
@@ -18,12 +19,15 @@ namespace AnomalyService.Controllers
     [ApiController]
     public class AnomalyReportController : ControllerBase
     {
+
+        private readonly ILogger _logger;
         private readonly ApplicationDBContext _db;
         private RabbitMQHelper rbbit = new RabbitMQHelper();
         private AnomalyHelper anm;
         private LoggerHelper logHelp;
-        public AnomalyReportController(ApplicationDBContext db)
+        public AnomalyReportController(ApplicationDBContext db, ILogger<AnomalyReportController> logger)
         {
+            _logger = logger;
             _db = db;
             anm = new AnomalyHelper(db);
             logHelp = new LoggerHelper();
@@ -33,6 +37,7 @@ namespace AnomalyService.Controllers
         public IActionResult GetAllAnomalyReports()
         {
             logHelp.Log(logHelp.getMessage("GetAllAnomalyReports"));
+            _logger.LogInformation(logHelp.getMessage("GetAllAnomalyReports"));
             try
             {
                 var result = new
@@ -41,6 +46,8 @@ namespace AnomalyService.Controllers
                     totalCount = _db.AnomalyReports.ToList().ToArray().Length
                 };
                 logHelp.Log(logHelp.getMessage("GetAllAnomalyReports", 200));
+                _logger.LogInformation(logHelp.getMessage("GetAllAnomalyReports", 200));
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -48,6 +55,9 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage("GetAllAnomalyReports", 500));
                 logHelp.Log(logHelp.getMessage("GetAllAnomalyReports", ex.Message));
+                _logger.LogError(logHelp.getMessage("GetAllAnomalyReports", 500));
+                _logger.LogError(logHelp.getMessage("GetAllAnomalyReports", ex.Message));
+
                 return StatusCode(500);
             }
            
@@ -58,6 +68,8 @@ namespace AnomalyService.Controllers
         public IActionResult GetAnomalyReportsForAnomalyId([FromRoute] int anomalyId)
         {
             logHelp.Log(logHelp.getMessage("GetAnomalyReportsForAnomalyId"));
+            _logger.LogInformation(logHelp.getMessage("GetAnomalyReportsForAnomalyId"));
+
             try
             {
                 var query = _db.AnomalyReports.Where(r => r.AnomalyId == anomalyId)
@@ -69,6 +81,8 @@ namespace AnomalyService.Controllers
                     totalCount = query.ToArray().Length
                 };
                 logHelp.Log(logHelp.getMessage("GetAnomalyReportsForAnomalyId", 200));
+                _logger.LogInformation(logHelp.getMessage("GetAnomalyReportsForAnomalyId", 200));
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -76,6 +90,9 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage("GetAnomalyReportsForAnomalyId", 500));
                 logHelp.Log(logHelp.getMessage("GetAnomalyReportsForAnomalyId", ex.Message));
+                _logger.LogError(logHelp.getMessage("GetAnomalyReportsForAnomalyId", 500));
+                _logger.LogError(logHelp.getMessage("GetAnomalyReportsForAnomalyId", ex.Message));
+
                 return StatusCode(500);
             }
             
@@ -87,6 +104,7 @@ namespace AnomalyService.Controllers
         {
             var methodName = "GetAnomalyReportById";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage("GetAnomalyReportById"));
             try
             {
                 var result = new
@@ -97,6 +115,8 @@ namespace AnomalyService.Controllers
                                     .FirstOrDefault()
                 };
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -104,6 +124,8 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
             
@@ -114,10 +136,15 @@ namespace AnomalyService.Controllers
         {
             var methodName = "AddAnomalyReport";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
             if (!ModelState.IsValid)
             {
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, "Not Valid"));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, "Not Valid"));
+
                 return new JsonResult(new
                 {
                     response = "Not Valid",
@@ -138,6 +165,8 @@ namespace AnomalyService.Controllers
                 var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
                 rbbit.SendMessage(jsonifiedAnomaly, "Report.Created");
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                 return new JsonResult(new
                 {
                     response = objAnomalyReport,
@@ -152,6 +181,8 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
            
@@ -162,6 +193,8 @@ namespace AnomalyService.Controllers
         {
             var methodName = "UpdateAnomalyReport";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
 
             try
             {
@@ -169,6 +202,9 @@ namespace AnomalyService.Controllers
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Not Found"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Not found"));
+
                     return new JsonResult(new
                     {
                         response = "Not Found",
@@ -190,6 +226,9 @@ namespace AnomalyService.Controllers
                     rbbit.SendMessage(jsonifiedAnomaly, "Report.Updated");
 
                     logHelp.Log(logHelp.getMessage(methodName, 200));
+                    _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
+
                     return new JsonResult(new
                     {
                         response = objAnomalyReport,
@@ -205,6 +244,10 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
+
+
                 return StatusCode(500);
             }
             
@@ -216,6 +259,8 @@ namespace AnomalyService.Controllers
         {
             var methodName = "DeleteAnomalyReport";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
             try
             {
                 var findAnomalyReport = await _db.AnomalyReports.FindAsync(id);
@@ -224,6 +269,8 @@ namespace AnomalyService.Controllers
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Not Found"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Not found"));
                     return NotFound();
                 }
                 else
@@ -238,6 +285,8 @@ namespace AnomalyService.Controllers
                     var jsonifiedAnomaly = JsonConvert.SerializeObject(updatedAnomaly);
                     rbbit.SendMessage(jsonifiedAnomaly, "Report.Deleted");
                     logHelp.Log(logHelp.getMessage(methodName, 200));
+                    _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                     return new JsonResult("Anomaly Deleted Successfully");
 
                 }
@@ -247,6 +296,9 @@ namespace AnomalyService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
+
                 return StatusCode(500);
             }
            
