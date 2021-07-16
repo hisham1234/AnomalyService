@@ -39,7 +39,7 @@ namespace AnomalyService
             //});
 
             // Add application insights login
-            services.AddApplicationInsightsTelemetry();
+            services.AddApplicationInsightsTelemetry(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 
 
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
