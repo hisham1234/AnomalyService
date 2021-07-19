@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using Microsoft.ApplicationInsights;
 
 namespace AnomalyService.Controllers
 {
@@ -22,14 +23,16 @@ namespace AnomalyService.Controllers
     public class AnomalyController : ControllerBase
     {
 
+        private readonly TelemetryClient _telemetry;
         private readonly ILogger _logger;
         private readonly ApplicationDBContext _db;
         private RabbitMQHelper rbbit = new RabbitMQHelper();
         private AnomalyHelper anm;
         private LoggerHelper logHelp;
 
-        public AnomalyController(ApplicationDBContext db, ILogger<AnomalyController> logger)
+        public AnomalyController(ApplicationDBContext db, ILogger<AnomalyController> logger, TelemetryClient telemetry)
         {
+            _telemetry = telemetry;
             _logger = logger;
             _db = db;
             anm = new AnomalyHelper(db);
