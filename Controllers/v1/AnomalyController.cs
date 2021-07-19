@@ -32,7 +32,7 @@ namespace AnomalyService.Controllers
 
         public AnomalyController(ApplicationDBContext db, ILogger<AnomalyController> logger, TelemetryClient telemetry)
         {
-            _telemetry = telemetry;
+            _telemetry = telemetry; // -> used by _logger according microsfot doc
             _logger = logger;
             _db = db;
             anm = new AnomalyHelper(db);

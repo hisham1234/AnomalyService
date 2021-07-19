@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AnomalyService.Data;
 using AnomalyService.Helpers;
 using AnomalyService.Models;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,13 @@ namespace AnomalyService.Controllers
     [ApiController]
     public class AnomalyReportImageController : ControllerBase
     {
-
+        private readonly TelemetryClient _telemetry;
         private readonly ILogger _logger;
         private readonly ApplicationDBContext _db;
         private LoggerHelper logHelp;
-        public AnomalyReportImageController(ApplicationDBContext db, ILogger<AnomalyReportImageController> logger)
+        public AnomalyReportImageController(ApplicationDBContext db, ILogger<AnomalyReportImageController> logger, TelemetryClient telemetry)
         {
+            _telemetry = telemetry; // -> used by _logger according microsfot doc
             _logger = logger;
             _db = db;
             logHelp = new LoggerHelper();
