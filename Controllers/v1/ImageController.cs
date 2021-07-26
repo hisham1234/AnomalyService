@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using AnomalyService.Data;
 using AnomalyService.Helpers;
 using AnomalyService.Models;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 
 namespace ImageService.Controllers
@@ -19,10 +21,15 @@ namespace ImageService.Controllers
     [ApiController]
     public class ImageController : ControllerBase
     {
+
+        private readonly TelemetryClient _telemetry;
+        private readonly ILogger _logger;
         private readonly ApplicationDBContext _db;
         private LoggerHelper logHelp;
-        public ImageController(ApplicationDBContext db)
+        public ImageController(ApplicationDBContext db, ILogger<ImageController> logger, TelemetryClient telemetry)
         {
+            _telemetry = telemetry; // -> used by _logger according microsfot doc
+            _logger = logger;
             _db = db;
             logHelp = new LoggerHelper();
         }
@@ -32,6 +39,7 @@ namespace ImageService.Controllers
         {
             var methodName = "GetAllImages";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
             try
             {
                 var result = new
@@ -39,6 +47,7 @@ namespace ImageService.Controllers
                     response = _db.Images.ToList()
                 };
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName, 200));
                 return Ok(result);
             }
             catch (Exception ex)
@@ -46,6 +55,9 @@ namespace ImageService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
+
                 return StatusCode(500);
             }
             
@@ -58,6 +70,8 @@ namespace ImageService.Controllers
         {
             var methodName = "AddImage";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
 
             try
             {
@@ -95,6 +109,8 @@ namespace ImageService.Controllers
                 await _db.SaveChangesAsync();
 
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                 return new JsonResult(new
                 {
                     response = newImageData
@@ -108,6 +124,9 @@ namespace ImageService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
+
                 return StatusCode(500);
             }
             
@@ -121,6 +140,8 @@ namespace ImageService.Controllers
         {
             var methodName = "UploadImage";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
 
             try
             {
@@ -140,11 +161,15 @@ namespace ImageService.Controllers
                         await new AzureStorageHelper().UploadAsync(ImageName, SavePath, stream);
                     }
                     logHelp.Log(logHelp.getMessage(methodName, 200));
+                    _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                     return new JsonResult("Image Uploaded successfully");
                 }else
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Image was empty"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Image was empty"));
                     return new JsonResult("Image was empty");
                 }
 
@@ -155,6 +180,8 @@ namespace ImageService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
            
@@ -165,6 +192,8 @@ namespace ImageService.Controllers
         {
             var methodName = "GetImage";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
             try
             {
                 var findImage = await _db.Images.FindAsync(id);
@@ -172,6 +201,8 @@ namespace ImageService.Controllers
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Not Found"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Not Found"));
                     return NotFound();
                 }
 
@@ -180,6 +211,8 @@ namespace ImageService.Controllers
                     response = findImage,
                 };
                 logHelp.Log(logHelp.getMessage(methodName, 200));
+                _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -187,6 +220,8 @@ namespace ImageService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
            
@@ -197,12 +232,16 @@ namespace ImageService.Controllers
         {
             var methodName = "UpdateImage";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
             try
             {
                 if (objImage == null || id != objImage.Id)
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Image was not found"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName, "Image was not found"));
                     return new JsonResult("Image was not Found");
                 }
                 else
@@ -210,6 +249,8 @@ namespace ImageService.Controllers
                     _db.Images.Update(objImage);
                     await _db.SaveChangesAsync();
                     logHelp.Log(logHelp.getMessage(methodName, 200));
+                    _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                     return new JsonResult("Image updated Successfully");
                 }
             }
@@ -218,6 +259,8 @@ namespace ImageService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
                 return StatusCode(500);
             }
             
@@ -229,6 +272,8 @@ namespace ImageService.Controllers
         {
             var methodName = "DeleteImage";
             logHelp.Log(logHelp.getMessage(methodName));
+            _logger.LogInformation(logHelp.getMessage(methodName));
+
 
             try
             {
@@ -238,6 +283,8 @@ namespace ImageService.Controllers
                 {
                     logHelp.Log(logHelp.getMessage(methodName, 500));
                     logHelp.Log(logHelp.getMessage(methodName, "Image was not found"));
+                    _logger.LogError(logHelp.getMessage(methodName, 500));
+                    _logger.LogError(logHelp.getMessage(methodName,"Image was not found"));
                     return NotFound();
                 }
                 else
@@ -245,6 +292,8 @@ namespace ImageService.Controllers
                     _db.Images.Remove(findImage);
                     await _db.SaveChangesAsync();
                     logHelp.Log(logHelp.getMessage(methodName, 200));
+                    _logger.LogInformation(logHelp.getMessage(methodName, 200));
+
                     return new JsonResult("Image Deleted Successfully");
                 }
             }
@@ -253,12 +302,11 @@ namespace ImageService.Controllers
 
                 logHelp.Log(logHelp.getMessage(methodName, 500));
                 logHelp.Log(logHelp.getMessage(methodName, ex.Message));
+                _logger.LogError(logHelp.getMessage(methodName, 500));
+                _logger.LogError(logHelp.getMessage(methodName, ex.Message));
+
                 return StatusCode(500);
             }
-           
         }
     }
-
-
-    
 }
