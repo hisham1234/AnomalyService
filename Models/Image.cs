@@ -74,7 +74,7 @@ namespace AnomalyService.Models
         {
             get
             {
-                return new AzureStorageHelper().GetServiceSasUriForBlob(this.Name);
+                return new AzureStorageHelper().GetServiceSasUriForBlurBlob(this.Name);
             } 
         }
 

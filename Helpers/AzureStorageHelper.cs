@@ -17,11 +17,13 @@ namespace AnomalyService.Helpers
 
         public string connectionString = string.Empty;
         public string containerName = string.Empty;
+        public string blurContainerName = string.Empty;
 
         public AzureStorageHelper()
         {
             this.connectionString = Startup.Configuration.GetConnectionString("AZURE_STORAGE_CONNECTION_STRING");
             this.containerName = Startup.Configuration.GetConnectionString("AZURE_CONTAINER_NAME");
+            this.blurContainerName= Startup.Configuration.GetConnectionString("AZURE_BLURED_CONTAINER_NAME");
 
             BlobServiceClient blobServiceClient = new BlobServiceClient(this.connectionString);
         }
@@ -90,7 +92,44 @@ namespace AnomalyService.Helpers
             }
         }
 
+        public Uri GetServiceSasUriForBlurBlob(string blobName,
+                                                   string storedPolicyName = null)
+        {
+            string connectionString = this.connectionString;
+            string containerName = this.blurContainerName;
 
+            BlobClient blobClient = new BlobClient(connectionString, containerName, blobName);
+
+
+
+            if (blobClient.CanGenerateSasUri)
+            {
+                BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                {
+                    BlobContainerName = blobClient.GetParentBlobContainerClient().Name,
+                    BlobName = blobClient.Name,
+                };
+
+                if (storedPolicyName == null)
+                {
+                    sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddHours(1);
+                    sasBuilder.SetPermissions(BlobSasPermissions.Read |
+                        BlobSasPermissions.Write);
+                }
+                else
+                {
+                    sasBuilder.Identifier = storedPolicyName;
+                }
+
+                Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
+
+                return sasUri;
+            }
+            else
+            {
+                return null;
+            }
+        }
         public async Task UploadAsync(string blobName, string savePath, Stream stream)
         {
             string connectionString = this.connectionString;
