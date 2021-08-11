@@ -160,13 +160,13 @@ namespace AnomalyService.Migrations
             modelBuilder.Entity("AnomalyService.Models.AnomalyReportImage", b =>
                 {
                     b.HasOne("AnomalyService.Models.AnomalyReport", "AnomalyReport")
-                        .WithMany("AnomelyReportImage")
+                        .WithMany("AnomalyReportImage")
                         .HasForeignKey("AnomalyReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AnomalyService.Models.Image", "Image")
-                        .WithMany("AnomelyReportImage")
+                        .WithMany("AnomalyReportImage")
                         .HasForeignKey("ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -183,12 +183,12 @@ namespace AnomalyService.Migrations
 
             modelBuilder.Entity("AnomalyService.Models.AnomalyReport", b =>
                 {
-                    b.Navigation("AnomelyReportImage");
+                    b.Navigation("AnomalyReportImage");
                 });
 
             modelBuilder.Entity("AnomalyService.Models.Image", b =>
                 {
-                    b.Navigation("AnomelyReportImage");
+                    b.Navigation("AnomalyReportImage");
                 });
 #pragma warning restore 612, 618
         }
