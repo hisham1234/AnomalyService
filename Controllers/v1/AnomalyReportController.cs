@@ -76,7 +76,7 @@ namespace AnomalyService.Controllers
             try
             {
                 var query = _db.AnomalyReports.Where(r => r.AnomalyId == anomalyId)
-                                            .Include(r => r.AnomelyReportImage)
+                                            .Include(r => r.AnomalyReportImage)
                                             .ThenInclude(aReportImage => aReportImage.Image);
                 var result = new
                 {
@@ -113,7 +113,7 @@ namespace AnomalyService.Controllers
                 var result = new
                 {
                     response = _db.AnomalyReports.Where(r => r.Id == id)
-                                    .Include(r => r.AnomelyReportImage)
+                                    .Include(r => r.AnomalyReportImage)
                                     .ThenInclude(rImage => rImage.Image)
                                     .FirstOrDefault()
                 };
