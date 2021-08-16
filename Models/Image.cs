@@ -78,7 +78,7 @@ namespace AnomalyService.Models
             } 
         }
 
-        public List<AnomalyReportImage> AnomelyReportImage { get; set; }
+        public List<AnomalyReportImage> AnomalyReportImage { get; set; }
 
     }
 

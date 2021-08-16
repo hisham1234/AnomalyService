@@ -21,9 +21,13 @@ namespace AnomalyService.Helpers
 
         public AzureStorageHelper()
         {
-            this.connectionString = Startup.Configuration.GetConnectionString("AZURE_STORAGE_CONNECTION_STRING");
-            this.containerName = Startup.Configuration.GetConnectionString("AZURE_CONTAINER_NAME");
-            this.blurContainerName= Startup.Configuration.GetConnectionString("AZURE_BLURED_CONTAINER_NAME");
+            //this.connectionString = Startup.Configuration.GetConnectionString("AZURE_STORAGE_CONNECTION_STRING");
+            //this.containerName = Startup.Configuration.GetConnectionString("AZURE_CONTAINER_NAME");
+            //this.blurContainerName= Startup.Configuration.GetConnectionString("AZURE_BLURED_CONTAINER_NAME");
+
+            this.connectionString = Startup.Configuration.GetSection("AzureSettings").GetValue<string>("AZURE_STORAGE_CONNECTION_STRING");    //Startup.Configuration.GetConnectionString("AZURE_STORAGE_CONNECTION_STRING");
+            this.containerName = Startup.Configuration.GetSection("AzureSettings").GetValue<string>("AZURE_CONTAINER_NAME"); //Startup.Configuration.GetConnectionString("AZURE_CONTAINER_NAME");
+            this.blurContainerName = Startup.Configuration.GetSection("AzureSettings").GetValue<string>("AZURE_BLURED_CONTAINER_NAME"); //Startup.Configuration.GetConnectionString("AZURE_BLURED_CONTAINER_NAME");
 
             BlobServiceClient blobServiceClient = new BlobServiceClient(this.connectionString);
         }

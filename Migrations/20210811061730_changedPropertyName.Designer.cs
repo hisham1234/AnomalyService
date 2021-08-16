@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AnomalyService.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20210601020823_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20210811061730_changedPropertyName")]
+    partial class changedPropertyName
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,6 +30,12 @@ namespace AnomalyService.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Latitude")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Longitude")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Title")
                         .HasColumnType("longtext");
@@ -146,13 +152,11 @@ namespace AnomalyService.Migrations
 
             modelBuilder.Entity("AnomalyService.Models.AnomalyReport", b =>
                 {
-                    b.HasOne("AnomalyService.Models.Anomaly", "Anomaly")
-                        .WithMany("AnomalyReport")
+                    b.HasOne("AnomalyService.Models.Anomaly", null)
+                        .WithMany("Reports")
                         .HasForeignKey("AnomalyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Anomaly");
                 });
 
             modelBuilder.Entity("AnomalyService.Models.AnomalyReportImage", b =>
@@ -176,7 +180,7 @@ namespace AnomalyService.Migrations
 
             modelBuilder.Entity("AnomalyService.Models.Anomaly", b =>
                 {
-                    b.Navigation("AnomalyReport");
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("AnomalyService.Models.AnomalyReport", b =>
